@@ -10,10 +10,10 @@ from library.models.dataValidation import DataValidation
 
 class AsyncLoginView(CreateAPIView):
     serializer_class = DataValidation(serializer_class=LoginSerializer)
-    service = AuthenticationService()
 
     async def post(self, request, *args, **kwargs):
-        result = await self.service.login(self.serializer_class.serializer_validate(request.data))
+        service = AuthenticationService()
+        result = await service.login(self.serializer_class.serializer_validate(request.data))
 
         if result.is_success:
             return Response(result.to_dict(), status=status.HTTP_200_OK)
@@ -22,13 +22,13 @@ class AsyncLoginView(CreateAPIView):
 
 
 class AsyncAccessTokenView(APIView):
-    service = AuthenticationService()
     data_validation = DataValidation(data_type=str)
 
     async def get(self, request, *args, **kwargs):
         refresh_token = self.data_validation.data_validation(request.GET.get('refresh_token'))
 
-        result = await self.service.get_access_token(refresh_token)
+        service = AuthenticationService()
+        result = await service.get_access_token(refresh_token)
 
         if result.is_success:
             return Response(result.to_dict(), status=status.HTTP_200_OK)

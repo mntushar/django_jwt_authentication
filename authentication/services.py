@@ -7,9 +7,9 @@ from Inventory import settings
 from backend.account.authentication.models import LoginResponse, Login
 from backend.account.user.models import User
 from library.Utility.information import Information
+from library.Utility.utility import Utility
 from library.account.jwtHandler import JWTHandler
 from library.account.tokenHandler import TokenHandler
-from library.account.utility import Utility
 from library.models.base_model_services import ModelServices
 
 
@@ -28,7 +28,7 @@ class AuthenticationService:
             user: User = await sync_to_async(authenticate)(username=login.username, password=login.password)
             if not user:
                 self.login_response.is_success = False
-                self.login_response.error = 'Invalid user or password'
+                self.login_response.message = 'Invalid user or password'
                 return self.login_response
 
             user_claim = await self.user_claim(user)
@@ -37,7 +37,7 @@ class AuthenticationService:
             self.login_response.refresh_token = (self.refresh_token_handler
                                                  .generate_refresh_token(str(user.id)))
             self.login_response.public_key = self.__public_key
-
+            self.login_response.is_success = True
             return self.login_response
         except Exception as e:
             self.login_response.is_success = False
@@ -90,8 +90,10 @@ class AuthenticationService:
             user_claim = await self.user_claim(user)
             self.login_response.access_token = self.token_handler.generate_token(user_claim)
 
+            self.login_response.is_success = True
+
             return self.login_response
         except Exception as e:
             self.login_response.is_success = False
-            self.login_response.error = self.utility.get_error(e)
+            self.login_response.message = self.utility.get_error(e)
             return self.login_response

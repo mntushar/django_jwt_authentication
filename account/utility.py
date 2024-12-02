@@ -1,4 +1,3 @@
-from django.conf import settings
 from rest_framework.exceptions import AuthenticationFailed
 
 
@@ -14,9 +13,3 @@ class Utility:
 
         token = parts[1]  # The second part is the actual token
         return token
-
-    def get_error(self, error: Exception) -> str:
-        if settings.DEBUG:
-            return str(error)
-        else:
-            return 'Something went wrong. Please try again after some time.'
